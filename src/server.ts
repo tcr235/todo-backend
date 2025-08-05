@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express'
 import { prisma } from './database/prisma';
+import { hashPassword } from './services/hashingService';
 
 const app = express()
 const port = 3000
@@ -18,13 +19,14 @@ app.post('/auth/register', async (req: Request, res: Response) => {
     }
 
     try {
+        const hashedPassword = await hashPassword(password);
         const user = await prisma.user.create({
             data: {
                 email,
-                password,
+                password: hashedPassword,
             },
         });
-        
+
         return res.status(201).json({ message: 'User registered successfully', user: { id: user.id, email: user.email } });
 
     } catch (error: any) {
