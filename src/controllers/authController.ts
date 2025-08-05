@@ -19,3 +19,17 @@ export const register = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const login = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+
+    try {
+        const token = await authService.loginUser(email, password);
+        return res.status(200).json({ message: "Login successful", token });
+    } catch (error: any) {
+        if (error instanceof InvalidInputError) {
+            return res.status(400).json({ error: "Invalid input" });
+        }
+        return res.status(401).json({ error: "Invalid email or password" });
+    }
+}

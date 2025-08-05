@@ -1,6 +1,10 @@
 import { prisma } from "../database/prisma";
-import { hashPassword } from "../services/hashingService";
+import { comparePasswords, hashPassword } from "../services/hashingService";
 import { InvalidInputError, DuplicatedEmailError, InternalError } from "../errors/CustomErrors";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const registerUser = async (email: string, password: string) => {
   if (!email || !password) {
@@ -26,3 +30,27 @@ export const registerUser = async (email: string, password: string) => {
     throw new InternalError();
   }
 };
+
+export const loginUser = async (email: string, password: string) => {
+  if (!email || !password){
+    throw new InvalidInputError();
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user || !(await comparePasswords(password, user.password))) {
+      throw new InvalidInputError();
+    }
+
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string, { algorithm: 'HS256', expiresIn: '1h' });
+    return token;
+
+  } catch (error) {
+    throw new InternalError();
+  }
+}
