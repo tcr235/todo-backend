@@ -1,22 +1,16 @@
 import Router from 'express';
 import { authenticateToken } from '../middleware/authMiddleware';
-import { getTasks } from '../controllers/taskController';
+import { taskController } from '../controllers/taskController';
 
 const taskRoutes = Router();
 
-taskRoutes.get('/', authenticateToken, getTasks);
+taskRoutes.get('/', authenticateToken, taskController.getTasks);
 
-taskRoutes.post('/', authenticateToken, (req, res) => {
-  res.send('Create a new task');
-});
+taskRoutes.post('/', authenticateToken, taskController.createTask);
 
-taskRoutes.put('/:id', authenticateToken, (req, res) => {
-  res.send('Edit a task');
-});
+taskRoutes.put('/:id', authenticateToken, taskController.updateTask);
 
-taskRoutes.delete('/:id', authenticateToken, (req, res) => {
-  res.send('Delete a task');
-});
+taskRoutes.delete('/:id', authenticateToken, taskController.deleteTask);
 
 export default taskRoutes;
 export { taskRoutes };
